@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [events, setEvents] = useState<FootballEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
+  const [editingEvent, setEditingEvent] = useState<FootballEvent | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -43,6 +44,7 @@ const App: React.FC = () => {
       alert("Please upload a video first.");
       return;
     }
+    setEditingEvent(null);
     setCurrentCoords(coords);
     setIsModalOpen(true);
   };
@@ -50,10 +52,17 @@ const App: React.FC = () => {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setCurrentCoords(null);
+    setEditingEvent(null);
   };
 
-  const handleModalSubmit = (eventData: Omit<FootballEvent, 'id' | 'x' | 'y' | 'normalizedX' | 'normalizedY'>) => {
-    if (currentCoords) {
+  const handleModalSubmit = (eventData: Omit<FootballEvent, 'id' | 'x' | 'y' | 'normalizedX' | 'normalizedY'>, id?: number) => {
+    if (editingEvent && id) {
+      // Update existing event
+      setEvents(prevEvents => prevEvents.map(event =>
+        event.id === id ? { ...event, ...eventData } : event
+      ));
+    } else if (currentCoords) {
+      // Create new event
       const newEvent: FootballEvent = {
         id: Date.now(),
         x: currentCoords.x,
@@ -63,8 +72,14 @@ const App: React.FC = () => {
         ...eventData,
       };
       setEvents(prevEvents => [...prevEvents, newEvent]);
-      handleModalClose();
     }
+    handleModalClose();
+  };
+  
+  const handleEditEvent = (event: FootballEvent) => {
+    setEditingEvent(event);
+    setCurrentCoords(null);
+    setIsModalOpen(true);
   };
 
   const handleDeleteEvent = (eventId: number) => {
@@ -182,18 +197,19 @@ const App: React.FC = () => {
                 <ClipboardListIcon />
                 <span className="ml-2">Tagged Events</span>
               </h2>
-              <EventList events={events} onDeleteEvent={handleDeleteEvent} />
+              <EventList events={events} onEditEvent={handleEditEvent} onDeleteEvent={handleDeleteEvent} />
             </div>
           </div>
         </div>
       </main>
 
-      {currentCoords && (
+      {isModalOpen && (
         <EventModal
           isOpen={isModalOpen}
           onClose={handleModalClose}
           onSubmit={handleModalSubmit}
           coords={currentCoords}
+          eventToEdit={editingEvent}
         />
       )}
     </div>

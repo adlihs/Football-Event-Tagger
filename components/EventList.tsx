@@ -1,13 +1,15 @@
+
 import React from 'react';
 import { FootballEvent, Outcome } from '../types';
-import { TrashIcon } from './Icons';
+import { TrashIcon, PencilIcon } from './Icons';
 
 interface EventListProps {
   events: FootballEvent[];
+  onEditEvent: (event: FootballEvent) => void;
   onDeleteEvent: (id: number) => void;
 }
 
-const EventList: React.FC<EventListProps> = ({ events, onDeleteEvent }) => {
+const EventList: React.FC<EventListProps> = ({ events, onEditEvent, onDeleteEvent }) => {
   if (events.length === 0) {
     return (
       <div className="text-center py-10 text-gray-500">
@@ -34,13 +36,22 @@ const EventList: React.FC<EventListProps> = ({ events, onDeleteEvent }) => {
             <p><span className="font-semibold">Time:</span> {event.minute} ({event.period})</p>
             <p><span className="font-semibold">Coords:</span> ({event.normalizedX}, {event.normalizedY})</p>
           </div>
-          <button
-            onClick={() => onDeleteEvent(event.id)}
-            className="absolute top-1/2 right-4 -translate-y-1/2 p-2 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-400"
-            aria-label={`Delete event: ${event.action}`}
-          >
-            <TrashIcon />
-          </button>
+          <div className="absolute top-1/2 right-4 -translate-y-1/2 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={() => onEditEvent(event)}
+              className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              aria-label={`Edit event: ${event.action}`}
+            >
+              <PencilIcon />
+            </button>
+            <button
+              onClick={() => onDeleteEvent(event.id)}
+              className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-400"
+              aria-label={`Delete event: ${event.action}`}
+            >
+              <TrashIcon />
+            </button>
+          </div>
         </div>
       ))}
     </div>

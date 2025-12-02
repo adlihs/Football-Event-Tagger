@@ -1,14 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { Period, Outcome, FootballEvent, Action } from '../types';
 
 interface EventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<FootballEvent, 'id' | 'x' | 'y' | 'normalizedX' | 'normalizedY'>) => void;
-  coords: { x: number; y: number; normalizedX: number; normalizedY: number; };
+  onSubmit: (data: Omit<FootballEvent, 'id' | 'x' | 'y' | 'normalizedX' | 'normalizedY'>, id?: number) => void;
+  coords: { x: number; y: number; normalizedX: number; normalizedY: number; } | null;
+  eventToEdit: FootballEvent | null;
 }
 
-const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coords }) => {
+const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coords, eventToEdit }) => {
   const [action, setAction] = useState<Action>(Action.Pass);
   const [player, setPlayer] = useState('');
   const [team, setTeam] = useState('');
@@ -17,21 +19,34 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
   const [period, setPeriod] = useState<Period>(Period.FIRST_HALF);
   const [outcome, setOutcome] = useState<Outcome>(Outcome.SUCCESSFUL);
   
-  const normalizedX = coords.normalizedX.toFixed(2);
-  const normalizedY = coords.normalizedY.toFixed(2);
+  const isEditing = !!eventToEdit;
+  const normalizedX = (isEditing ? eventToEdit.normalizedX : coords?.normalizedX ?? 0).toFixed(2);
+  const normalizedY = (isEditing ? eventToEdit.normalizedY : coords?.normalizedY ?? 0).toFixed(2);
 
   useEffect(() => {
     if (isOpen) {
-      // Reset form on open
-      setAction(Action.Pass);
-      setPlayer('');
-      setTeam('');
-      setMinute('');
-      setSeconds('');
-      setPeriod(Period.FIRST_HALF);
-      setOutcome(Outcome.SUCCESSFUL);
+      if (isEditing) {
+        // Populate form with event data to edit
+        setAction(eventToEdit.action);
+        setPlayer(eventToEdit.player);
+        setTeam(eventToEdit.team);
+        const [min, sec] = eventToEdit.minute.split(':');
+        setMinute(min);
+        setSeconds(sec);
+        setPeriod(eventToEdit.period);
+        setOutcome(eventToEdit.outcome);
+      } else {
+        // Reset form for new event
+        setAction(Action.Pass);
+        setPlayer('');
+        setTeam('');
+        setMinute('');
+        setSeconds('');
+        setPeriod(Period.FIRST_HALF);
+        setOutcome(Outcome.SUCCESSFUL);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isEditing, eventToEdit]);
 
   if (!isOpen) return null;
 
@@ -45,14 +60,16 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
     const pad = (numStr: string) => numStr.padStart(2, '0');
     const formattedTime = `${pad(minute)}:${pad(seconds)}`;
 
-    onSubmit({
+    const eventData = {
       action,
       player,
       team,
       minute: formattedTime,
       period,
       outcome,
-    });
+    };
+
+    onSubmit(eventData, eventToEdit?.id);
   };
   
   const inputClass = "w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition";
@@ -61,7 +78,7 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg shadow-2xl p-8 w-full max-w-lg transform transition-all">
-        <h2 className="text-2xl font-bold mb-6 text-green-400">Tag New Event</h2>
+        <h2 className="text-2xl font-bold mb-6 text-green-400">{isEditing ? 'Edit Event' : 'Tag New Event'}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>

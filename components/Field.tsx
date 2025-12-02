@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { FootballEvent } from '../types';
 import { LargeImageIcon } from './Icons';
@@ -44,10 +43,24 @@ const Field: React.FC<FieldProps> = ({ onFieldClick, events, fieldImageUrl }) =>
             {events.map(event => (
               <div
                 key={event.id}
-                className="absolute w-4 h-4 rounded-full bg-red-500 border-2 border-white transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform hover:scale-150"
+                className="group absolute transform -translate-x-1/2 -translate-y-1/2"
                 style={{ left: `${event.x}px`, top: `${event.y}px` }}
-                title={`Action: ${event.action}\nPlayer: ${event.player}\nTime: ${event.minute}`}
-              />
+              >
+                <div
+                  className="w-4 h-4 rounded-full bg-red-500 border-2 border-white cursor-pointer transition-transform group-hover:scale-150"
+                />
+                <div
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs p-3 text-sm text-gray-100 bg-gray-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none z-10"
+                >
+                  <h4 className="font-bold text-base text-green-400 border-b border-gray-700 pb-1 mb-2">{event.action}</h4>
+                  <div className="space-y-1">
+                      <p><span className="font-semibold text-gray-400">Player:</span> {event.player} ({event.team})</p>
+                      <p><span className="font-semibold text-gray-400">Time:</span> {event.minute} ({event.period})</p>
+                      <p><span className="font-semibold text-gray-400">Outcome:</span> {event.outcome}</p>
+                  </div>
+                   <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></div>
+                </div>
+              </div>
             ))}
           </>
         ) : (
