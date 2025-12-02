@@ -47,3 +47,13 @@ export interface FootballEvent {
   period: Period;
   outcome: Outcome;
 }
+
+export interface TeamLineup {
+  name: string;
+  players: string[];
+}
+
+export interface Lineups {
+  teamA: TeamLineup;
+  teamB: TeamLineup;
+}

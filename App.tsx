@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { FootballEvent } from './types';
+import { FootballEvent, Lineups } from './types';
 import VideoPlayer from './components/VideoPlayer';
 import Field from './components/Field';
 import EventModal from './components/EventModal';
 import EventList from './components/EventList';
+import LineupManager from './components/LineupManager';
 import { UploadIcon, ClipboardListIcon, ImageIcon, DownloadIcon, TrashIcon } from './components/Icons';
 
 type Coords = {
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
   const [editingEvent, setEditingEvent] = useState<FootballEvent | null>(null);
+  const [lineups, setLineups] = useState<Lineups | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -100,9 +102,7 @@ const App: React.FC = () => {
 
     const headers = ['id', 'action', 'player', 'team', 'minute', 'period', 'outcome', 'normalizedX', 'normalizedY'];
     
-    // Helper to safely format CSV fields
     const formatCsvField = (field: string) => {
-      // Escape double quotes by doubling them and wrap in double quotes if it contains a comma, newline or double quote.
       if (/[",\n]/.test(field)) {
         return `"${field.replace(/"/g, '""')}"`;
       }
@@ -135,6 +135,10 @@ const App: React.FC = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const handleSaveLineups = (lineupsData: Lineups) => {
+    setLineups(lineupsData);
   };
 
   return (
@@ -191,7 +195,8 @@ const App: React.FC = () => {
             <VideoPlayer src={videoUrl} />
             <Field onFieldClick={handleFieldClick} events={events} fieldImageUrl={fieldImageUrl} />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-8">
+             <LineupManager onSave={handleSaveLineups} />
              <div className="bg-gray-800 rounded-lg shadow-xl p-4 sticky top-4">
               <h2 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-2 flex items-center text-green-400">
                 <ClipboardListIcon />
@@ -210,6 +215,7 @@ const App: React.FC = () => {
           onSubmit={handleModalSubmit}
           coords={currentCoords}
           eventToEdit={editingEvent}
+          lineups={lineups}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Period, Outcome, FootballEvent, Action } from '../types';
+import { Period, Outcome, FootballEvent, Action, Lineups } from '../types';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -8,9 +8,10 @@ interface EventModalProps {
   onSubmit: (data: Omit<FootballEvent, 'id' | 'x' | 'y' | 'normalizedX' | 'normalizedY'>, id?: number) => void;
   coords: { x: number; y: number; normalizedX: number; normalizedY: number; } | null;
   eventToEdit: FootballEvent | null;
+  lineups: Lineups | null;
 }
 
-const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coords, eventToEdit }) => {
+const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coords, eventToEdit, lineups }) => {
   const [action, setAction] = useState<Action>(Action.Pass);
   const [player, setPlayer] = useState('');
   const [team, setTeam] = useState('');
@@ -22,6 +23,9 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
   const isEditing = !!eventToEdit;
   const normalizedX = (isEditing ? eventToEdit.normalizedX : coords?.normalizedX ?? 0).toFixed(2);
   const normalizedY = (isEditing ? eventToEdit.normalizedY : coords?.normalizedY ?? 0).toFixed(2);
+
+  const allPlayers = lineups ? [...lineups.teamA.players, ...lineups.teamB.players] : [];
+  const hasLineups = allPlayers.length > 0;
 
   useEffect(() => {
     if (isOpen) {
@@ -38,17 +42,28 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
       } else {
         // Reset form for new event
         setAction(Action.Pass);
-        setPlayer('');
-        setTeam('');
+        setPlayer(hasLineups ? allPlayers[0] : '');
+        setTeam(hasLineups && lineups ? lineups.teamA.players.includes(allPlayers[0]) ? lineups.teamA.name : lineups.teamB.name : '');
         setMinute('');
         setSeconds('');
         setPeriod(Period.FIRST_HALF);
         setOutcome(Outcome.SUCCESSFUL);
       }
     }
-  }, [isOpen, isEditing, eventToEdit]);
+  }, [isOpen, isEditing, eventToEdit, hasLineups]);
 
   if (!isOpen) return null;
+
+  const handlePlayerChange = (selectedPlayer: string) => {
+    setPlayer(selectedPlayer);
+    if (lineups) {
+      if (lineups.teamA.players.includes(selectedPlayer)) {
+        setTeam(lineups.teamA.name);
+      } else if (lineups.teamB.players.includes(selectedPlayer)) {
+        setTeam(lineups.teamB.name);
+      }
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,11 +116,22 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="player" className={labelClass}>Player</label>
-              <input id="player" type="text" value={player} onChange={e => setPlayer(e.target.value)} className={inputClass} placeholder="Player's name" />
+              {hasLineups && lineups ? (
+                <select id="player" value={player} onChange={e => handlePlayerChange(e.target.value)} className={inputClass}>
+                  <optgroup label={lineups.teamA.name}>
+                    {lineups.teamA.players.map(p => <option key={p} value={p}>{p}</option>)}
+                  </optgroup>
+                  <optgroup label={lineups.teamB.name}>
+                    {lineups.teamB.players.map(p => <option key={p} value={p}>{p}</option>)}
+                  </optgroup>
+                </select>
+              ) : (
+                <input id="player" type="text" value={player} onChange={e => setPlayer(e.target.value)} className={inputClass} placeholder="Player's name" />
+              )}
             </div>
             <div>
               <label htmlFor="team" className={labelClass}>Team</label>
-              <input id="team" type="text" value={team} onChange={e => setTeam(e.target.value)} className={inputClass} placeholder="Team's name" />
+              <input id="team" type="text" value={team} onChange={e => setTeam(e.target.value)} className={inputClass} placeholder="Team's name" readOnly={hasLineups} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
