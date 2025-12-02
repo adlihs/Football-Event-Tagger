@@ -1,0 +1,5 @@
+{
+  "name": "Football Event Tagger",
+  "description": "An application to tag football events from a video. Users can upload a video, play it, and click on an interactive football field to log specific actions, players, and outcomes at different points in the match.",
+  "requestFramePermissions": []
+}
