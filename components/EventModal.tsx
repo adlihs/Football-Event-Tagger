@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Period, Outcome, FootballEvent } from '../types';
+import { Period, Outcome, FootballEvent, Action } from '../types';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -10,10 +9,11 @@ interface EventModalProps {
 }
 
 const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coords }) => {
-  const [action, setAction] = useState('');
+  const [action, setAction] = useState<Action>(Action.Pass);
   const [player, setPlayer] = useState('');
   const [team, setTeam] = useState('');
   const [minute, setMinute] = useState('');
+  const [seconds, setSeconds] = useState('');
   const [period, setPeriod] = useState<Period>(Period.FIRST_HALF);
   const [outcome, setOutcome] = useState<Outcome>(Outcome.SUCCESSFUL);
   
@@ -23,10 +23,11 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
   useEffect(() => {
     if (isOpen) {
       // Reset form on open
-      setAction('');
+      setAction(Action.Pass);
       setPlayer('');
       setTeam('');
       setMinute('');
+      setSeconds('');
       setPeriod(Period.FIRST_HALF);
       setOutcome(Outcome.SUCCESSFUL);
     }
@@ -36,15 +37,19 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!action || !player || !team || !minute) {
+    if (!action || !player || !team || !minute || !seconds) {
       alert("Please fill all fields.");
       return;
     }
+
+    const pad = (numStr: string) => numStr.padStart(2, '0');
+    const formattedTime = `${pad(minute)}:${pad(seconds)}`;
+
     onSubmit({
       action,
       player,
       team,
-      minute: parseInt(minute, 10),
+      minute: formattedTime,
       period,
       outcome,
     });
@@ -70,7 +75,11 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
           </div>
           <div>
             <label htmlFor="action" className={labelClass}>Action / Event</label>
-            <input id="action" type="text" value={action} onChange={e => setAction(e.target.value)} className={inputClass} placeholder="e.g., Pass, Shot, Tackle" />
+            <select id="action" value={action} onChange={e => setAction(e.target.value as Action)} className={inputClass}>
+              {Object.values(Action).map(actionValue => (
+                <option key={actionValue} value={actionValue}>{actionValue}</option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -83,9 +92,13 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSubmit, coor
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-             <div>
-              <label htmlFor="minute" className={labelClass}>Minute</label>
-              <input id="minute" type="number" min="0" max="120" value={minute} onChange={e => setMinute(e.target.value)} className={inputClass} placeholder="e.g., 42" />
+            <div>
+              <label className={labelClass}>Time</label>
+              <div className="flex items-center space-x-2">
+                <input id="minute" type="number" min="0" max="120" value={minute} onChange={e => setMinute(e.target.value)} className={inputClass} placeholder="mm" />
+                <span className="text-gray-400">:</span>
+                <input id="seconds" type="number" min="0" max="59" value={seconds} onChange={e => setSeconds(e.target.value)} className={inputClass} placeholder="ss" />
+              </div>
             </div>
             <div>
               <label htmlFor="period" className={labelClass}>Period</label>

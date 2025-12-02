@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FootballEvent, Outcome } from '../types';
 import { TrashIcon } from './Icons';
@@ -32,7 +31,7 @@ const EventList: React.FC<EventListProps> = ({ events, onDeleteEvent }) => {
           </div>
           <div className="text-sm text-gray-300 mt-2">
             <p><span className="font-semibold">Player:</span> {event.player} ({event.team})</p>
-            <p><span className="font-semibold">Time:</span> {event.minute}' ({event.period})</p>
+            <p><span className="font-semibold">Time:</span> {event.minute} ({event.period})</p>
             <p><span className="font-semibold">Coords:</span> ({event.normalizedX}, {event.normalizedY})</p>
           </div>
           <button

@@ -40,7 +40,7 @@ const Field: React.FC<FieldProps> = ({ onFieldClick, events, fieldImageUrl }) =>
             key={event.id}
             className="absolute w-4 h-4 rounded-full bg-red-500 border-2 border-white transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform hover:scale-150"
             style={{ left: `${event.x}px`, top: `${event.y}px` }}
-            title={`Action: ${event.action}\nPlayer: ${event.player}\nMinute: ${event.minute}'`}
+            title={`Action: ${event.action}\nPlayer: ${event.player}\nTime: ${event.minute}`}
           />
         ))}
       </div>

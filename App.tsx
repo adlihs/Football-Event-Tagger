@@ -5,7 +5,7 @@ import VideoPlayer from './components/VideoPlayer';
 import Field from './components/Field';
 import EventModal from './components/EventModal';
 import EventList from './components/EventList';
-import { UploadIcon, ClipboardListIcon, ImageIcon, DownloadIcon } from './components/Icons';
+import { UploadIcon, ClipboardListIcon, ImageIcon, DownloadIcon, TrashIcon } from './components/Icons';
 
 type Coords = {
   x: number;
@@ -71,6 +71,12 @@ const App: React.FC = () => {
     setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
   };
 
+  const handleClearAllEvents = () => {
+    if (window.confirm('Are you sure you want to delete all events?')) {
+      setEvents([]);
+    }
+  };
+
   const handleExport = () => {
     if (events.length === 0) {
       alert("No events to export.");
@@ -122,6 +128,14 @@ const App: React.FC = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-green-400">Football Event Tagger</h1>
           <div className="flex items-center space-x-4">
+             <button
+              onClick={handleClearAllEvents}
+              disabled={events.length === 0}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg cursor-pointer flex items-center transition-colors duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed"
+            >
+              <TrashIcon />
+              <span className="ml-2">Clear All</span>
+            </button>
              <button
               onClick={handleExport}
               disabled={events.length === 0}
