@@ -16,7 +16,7 @@ type Coords = {
 
 const App: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [fieldImageUrl, setFieldImageUrl] = useState<string>('https://i.imgur.com/39a2QzO.jpeg');
+  const [fieldImageUrl, setFieldImageUrl] = useState<string | null>(null);
   const [events, setEvents] = useState<FootballEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
